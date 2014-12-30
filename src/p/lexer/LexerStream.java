@@ -2,23 +2,25 @@ package p.lexer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.math.BigDecimal;
 
 public class LexerStream {
 
-    InputStream stream;
+    PushbackInputStream stream;
     int position = 0;
     int line = 1;
     char rawCharacter;
     boolean hasMore = true;
-    Integer lookahead = null;
 
     LexicalToken eos;
-    CharBuffer buffer = new CharBuffer();
-    char[] unicodeCharacterbuffer = new char[]{'\\', 'u', '\0', '\0', '\0', '\0'};
+    CharBuffer buffer;
+    StringLexer stringLexer;
 
     public LexerStream(InputStream stream) {
-        this.stream = stream;
+        this.stream = new PushbackInputStream(stream, 1);
+        buffer = new CharBuffer();
+        stringLexer = new StringLexer(this.stream, buffer);
     }
 
     public LexicalToken next() {
@@ -47,12 +49,20 @@ public class LexerStream {
                     position = 0;
                     line++;
                     if ((raw = read()) != '\n') {
-                        lookahead = raw;
+                        uncheckPushBack(raw);
                     }
                     break;
                 default:
                     return parseToken(raw);
             }
+        }
+    }
+
+    private void uncheckPushBack(int raw) {
+        try {
+            stream.unread(raw);
+        } catch (IOException ioe) {
+            throw new IllegalStateException(ioe);
         }
     }
 
@@ -104,7 +114,7 @@ public class LexerStream {
 
     private LexicalToken lexNumber(char rawCharacter) {
         buffer.reset();
-        lookahead = (int)rawCharacter;
+        uncheckPushBack((int) rawCharacter);
 
         lexNateralNumber();
 
@@ -119,7 +129,7 @@ public class LexerStream {
                 buffer.append('E');
                 lexPrecision();
             default:
-                lookahead = c;
+                uncheckPushBack(c);
         }
 
         LexicalToken token = new LexicalToken();
@@ -136,7 +146,7 @@ public class LexerStream {
     }
 
     private LexicalToken lexStringToken() {
-        char[] chars = lexString();
+        char[] chars = stringLexer.lexString(position, line);
         LexicalToken t = asToken(TokenType.STRING, chars.length);
         t.value = new String(chars);
         return t;
@@ -164,49 +174,6 @@ public class LexerStream {
         }
     }
 
-    private char[] lexString() {
-        buffer.reset();
-
-        while (true) {
-            rawCharacter = readChar();
-            switch (rawCharacter) {
-                case '\\':
-                    rawCharacter = findEscaped(readChar());
-                    buffer.append(rawCharacter);
-                    break;
-                case '"':
-                    return buffer.toArray();
-                default:
-                    buffer.append(rawCharacter);
-            }
-        }
-    }
-
-    private char findEscaped(char c) {
-        switch (c) {
-            case '"':
-                return '"';
-            case '\\':
-                return '\\';
-            case '/':
-                return '/';
-            case 'b':
-                return '\b';
-            case 'f':
-                return '\f';
-            case 'n':
-                return '\n';
-            case 'r':
-                return '\r';
-            case 't':
-                return '\t';
-            case 'u':
-                return readUnicode();
-            default:
-                throw new CompleteSuprise(position + buffer.length(), line, new char[]{'\\', 'c'});
-        }
-    }
-
     private char readChar() {
         int raw = read();
         checkNotEndOfStream(raw);
@@ -214,64 +181,16 @@ public class LexerStream {
     }
 
     private int read() {
-
-        if (lookahead == null) {
-            try {
-                return stream.read();
-            } catch (IOException io) {
-                throw new UnexpectedEndOfStream();
-            }
-        } else {
-            int t = lookahead;
-            lookahead = null;
-            return t;
+        try {
+            return stream.read();
+        } catch (IOException io) {
+            throw new UnexpectedEndOfStream();
         }
     }
 
     private void checkNotEndOfStream(int raw) {
         if (raw == -1) {
             throw new UnexpectedEndOfStream();
-        }
-    }
-
-    private char readUnicode() {
-        unicodeCharacterbuffer[2] = readChar();
-        unicodeCharacterbuffer[3] = readChar();
-        unicodeCharacterbuffer[4] = readChar();
-        unicodeCharacterbuffer[5] = readChar();
-
-        char hex1 = (char) toHexValue(unicodeCharacterbuffer[2]);
-        char hex2 = (char) toHexValue(unicodeCharacterbuffer[3]);
-        char hex3 = (char) toHexValue(unicodeCharacterbuffer[4]);
-        char hex4 = (char) toHexValue(unicodeCharacterbuffer[5]);
-
-        if (checkOutOfBounds(hex1)) {
-            throw new CompleteSuprise(position + 2, line, unicodeCharacterbuffer);
-        }
-        if (checkOutOfBounds(hex2)) {
-            throw new CompleteSuprise(position + 3, line, unicodeCharacterbuffer);
-        }
-        if (checkOutOfBounds(hex3)) {
-            throw new CompleteSuprise(position + 4, line, unicodeCharacterbuffer);
-        }
-        if (checkOutOfBounds(hex4)) {
-            throw new CompleteSuprise(position + 5, line, unicodeCharacterbuffer);
-        }
-
-        return (char) ((hex1 << 12) + (hex2 << 8) + (hex3 << 4) + hex4);
-    }
-
-    private static boolean checkOutOfBounds(char c) {
-        return (c > 16 || c < 0);
-    }
-
-    private static int toHexValue(char c) {
-        if (c >= 'a') {
-            return 10 + c - 'a';
-        } else if (c >= 'A') {
-            return 10 + c - 'A';
-        } else {
-            return c - '0';
         }
     }
 
@@ -284,7 +203,7 @@ public class LexerStream {
         } else if (c == '-') {
             buffer.append(c);
         } else {
-            lookahead = (int) c;
+            uncheckPushBack(c);
         }
 
         lexUnnaturalNumber();
@@ -308,7 +227,7 @@ public class LexerStream {
                     buffer.append((char) readChar);
                     break;
                 default:
-                    lookahead = readChar;
+                    uncheckPushBack(readChar);
                     hasMore = false;
             }
         } while (hasMore);
