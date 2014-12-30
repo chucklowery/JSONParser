@@ -2,6 +2,7 @@ package p.lexer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 
 class StaticHelpers {
 
@@ -22,6 +23,14 @@ class StaticHelpers {
     static void checkNotEndOfStream(int raw) {
         if (raw == -1) {
             throw new UnexpectedEndOfStream();
+        }
+    }
+
+    static void uncheckPushBack(PushbackInputStream stream, int raw) {
+        try {
+            stream.unread(raw);
+        } catch (IOException ioe) {
+            throw new IllegalStateException(ioe);
         }
     }
 }

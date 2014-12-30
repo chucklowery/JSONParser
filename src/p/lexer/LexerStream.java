@@ -3,7 +3,6 @@ package p.lexer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-import java.math.BigDecimal;
 import static p.lexer.StaticHelpers.read;
 import static p.lexer.StaticHelpers.readChar;
 
@@ -18,11 +17,13 @@ public class LexerStream {
     LexicalToken eos;
     CharBuffer buffer;
     StringLexer stringLexer;
+    NumberLexer numberLexer;
 
     public LexerStream(InputStream stream) {
         this.stream = new PushbackInputStream(stream, 1);
         buffer = new CharBuffer();
         stringLexer = new StringLexer(this.stream);
+        numberLexer = new NumberLexer(this.stream);
     }
 
     public LexicalToken next() {
@@ -107,39 +108,11 @@ public class LexerStream {
             case '8':
             case '9':
             case '0':
-                return lexNumber(rawCharacter);
+                uncheckPushBack((int) rawCharacter);
+                return numberLexer.lexNumber(position, line);
             default:
                 throw new CompleteSuprise(position, line, new char[]{rawCharacter});
-
         }
-    }
-
-    private LexicalToken lexNumber(char rawCharacter) {
-        buffer.reset();
-        uncheckPushBack((int) rawCharacter);
-
-        lexNateralNumber();
-
-        int c = read(stream);
-        switch (c) {
-            case '.':
-                buffer.append('.');
-                lexUnnaturalNumber();
-                break;
-            case 'E':
-            case 'e':
-                buffer.append('E');
-                lexPrecision();
-            default:
-                uncheckPushBack(c);
-        }
-
-        LexicalToken token = new LexicalToken();
-        token.line = line;
-        token.type = TokenType.NUMBER;
-        token.value = new BigDecimal(new String(buffer.toArray()));
-        position += buffer.length();
-        return token;
     }
 
     private LexicalToken asLiteralToken(String value, TokenType type) {
@@ -176,47 +149,6 @@ public class LexerStream {
         }
     }
 
-    private void lexNateralNumber() {
-        char c = readChar(stream);
-
-        if (c == '0') {
-            buffer.append(c);
-            return;
-        } else if (c == '-') {
-            buffer.append(c);
-        } else {
-            uncheckPushBack(c);
-        }
-
-        lexUnnaturalNumber();
-    }
-
-    private void lexUnnaturalNumber() {
-        boolean hasMore = true;
-        do {
-            int readChar = read(stream);
-            switch (readChar) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    buffer.append((char) readChar);
-                    break;
-                default:
-                    uncheckPushBack(readChar);
-                    hasMore = false;
-            }
-        } while (hasMore);
-    }
-
-    private void lexPrecision() {
-    }
 }
 
 class UnexpectedEndOfStream extends IllegalStateException {
