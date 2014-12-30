@@ -1,7 +1,7 @@
 package p.lexer;
 
-import java.io.IOException;
 import java.io.PushbackInputStream;
+import static p.lexer.StaticHelpers.readChar;
 
 class StringLexer {
 
@@ -12,22 +12,21 @@ class StringLexer {
     int position;
     int line;
 
-    public StringLexer(PushbackInputStream stream, CharBuffer buffer) {
+    public StringLexer(PushbackInputStream stream) {
         this.stream = stream;
-        this.buffer = buffer;
+        this.buffer = new CharBuffer();
     }
 
     char[] lexString(int position, int line) {
         this.line = line;
         this.position = position;
-
         buffer.reset();
 
         while (true) {
-            char rawCharacter = readChar();
+            char rawCharacter = readChar(stream);
             switch (rawCharacter) {
                 case '\\':
-                    rawCharacter = findEscaped(readChar());
+                    rawCharacter = findEscaped(readChar(stream));
                     buffer.append(rawCharacter);
                     break;
                 case '"':
@@ -64,10 +63,10 @@ class StringLexer {
     }
 
     private char readUnicode() {
-        unicodeCharacterbuffer[2] = readChar();
-        unicodeCharacterbuffer[3] = readChar();
-        unicodeCharacterbuffer[4] = readChar();
-        unicodeCharacterbuffer[5] = readChar();
+        unicodeCharacterbuffer[2] = readChar(stream);
+        unicodeCharacterbuffer[3] = readChar(stream);
+        unicodeCharacterbuffer[4] = readChar(stream);
+        unicodeCharacterbuffer[5] = readChar(stream);
 
         char hex1 = (char) toHexValue(unicodeCharacterbuffer[2]);
         char hex2 = (char) toHexValue(unicodeCharacterbuffer[3]);
@@ -101,26 +100,6 @@ class StringLexer {
             return 10 + c - 'A';
         } else {
             return c - '0';
-        }
-    }
-
-    private char readChar() {
-        int raw = read();
-        checkNotEndOfStream(raw);
-        return (char) raw;
-    }
-
-    private int read() {
-        try {
-            return stream.read();
-        } catch (IOException io) {
-            throw new UnexpectedEndOfStream();
-        }
-    }
-
-    private void checkNotEndOfStream(int raw) {
-        if (raw == -1) {
-            throw new UnexpectedEndOfStream();
         }
     }
 }

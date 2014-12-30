@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.math.BigDecimal;
+import static p.lexer.StaticHelpers.read;
+import static p.lexer.StaticHelpers.readChar;
 
 public class LexerStream {
 
@@ -20,13 +22,13 @@ public class LexerStream {
     public LexerStream(InputStream stream) {
         this.stream = new PushbackInputStream(stream, 1);
         buffer = new CharBuffer();
-        stringLexer = new StringLexer(this.stream, buffer);
+        stringLexer = new StringLexer(this.stream);
     }
 
     public LexicalToken next() {
         int raw;
         while (true) {
-            raw = read();
+            raw = read(stream);
             switch (raw) {
                 case -1:
                     LexicalToken token = new LexicalToken();
@@ -48,7 +50,7 @@ public class LexerStream {
                 case '\r':
                     position = 0;
                     line++;
-                    if ((raw = read()) != '\n') {
+                    if ((raw = read(stream)) != '\n') {
                         uncheckPushBack(raw);
                     }
                     break;
@@ -118,7 +120,7 @@ public class LexerStream {
 
         lexNateralNumber();
 
-        int c = read();
+        int c = read(stream);
         switch (c) {
             case '.':
                 buffer.append('.');
@@ -167,35 +169,15 @@ public class LexerStream {
 
     public void checkIf(String reserved) {
         for (int i = 1; i < reserved.length(); i++) {
-            char letter = readChar();
+            char letter = readChar(stream);
             if (letter != reserved.charAt(i)) {
                 throw new CompleteSuprise(position, line, reserved.toCharArray(), " expected *" + reserved + "* ");
             }
         }
     }
 
-    private char readChar() {
-        int raw = read();
-        checkNotEndOfStream(raw);
-        return (char) raw;
-    }
-
-    private int read() {
-        try {
-            return stream.read();
-        } catch (IOException io) {
-            throw new UnexpectedEndOfStream();
-        }
-    }
-
-    private void checkNotEndOfStream(int raw) {
-        if (raw == -1) {
-            throw new UnexpectedEndOfStream();
-        }
-    }
-
     private void lexNateralNumber() {
-        char c = readChar();
+        char c = readChar(stream);
 
         if (c == '0') {
             buffer.append(c);
@@ -212,7 +194,7 @@ public class LexerStream {
     private void lexUnnaturalNumber() {
         boolean hasMore = true;
         do {
-            int readChar = read();
+            int readChar = read(stream);
             switch (readChar) {
                 case '0':
                 case '1':
