@@ -1,0 +1,57 @@
+<JSON> ::= <Map>
+
+<Map> ::= '{' <KeyValue> '}'
+		| '{' '}'
+		;
+		
+<KeyValue> ::= <String> ':' <Value>
+			 ;
+
+<Array> ::= '[' <ArrayValue> ']'
+		  | '[' ']'
+		  ;
+		  
+<ArrayValue> ::= <ArrayValue> ',' <Value> 
+			   | <Value>
+			   
+<Value> ::= <Map>
+		  | <Array>
+		  | <String>
+		  | <Number>
+		  | 'true'
+		  | 'false'
+		  | 'null'
+		  
+<String> ::= '"' <StringValue> '"'
+
+<StringValue> ::= [^"\\]
+				| \ <StringEscapedValue>
+				
+<StringEscapedValue> ::= "	(Quotation Mark)
+					   | \	(Reverse Solidus)
+					   | /	(Solidus)
+					   | b	(Backspace)
+					   | f	(formfeed)
+					   | n	(newline)
+					   | r	(carriage return)
+					   | t	(horizontal table)
+					   | u<hexdigit><hexdigit><hexdigit><hexdigit>
+					   
+<Number> ::= | <RealNumber><Precision>
+			 | <RealNumber>
+					   
+<Precision> ::=  [Ee] [+\-]? <NaturalNumber>
+					   
+<RealNumber> ::= '-'? <NaturalNumber> '.' <UnnaturalNumber>
+		       | '-'? <NaturalNumber>
+			   
+<UnnaturalNumber> ::= [0-9]+
+
+<NaturalNumber> ::=  '0'
+				  |  [1-9] [0-9]*
+				  
+<hexdigit> ::= [0-9a-fA-F]
+
+
+					   
+		  
