@@ -1,15 +1,15 @@
 <JSON> ::= <Map>
+		 | <Array>
 
 <Map> ::= '{' <KeyValue> '}'
 		| '{' '}'
-		;
+
 		
 <KeyValue> ::= <String> ':' <Value>
-			 ;
+
 
 <Array> ::= '[' <ArrayValue> ']'
 		  | '[' ']'
-		  ;
 		  
 <ArrayValue> ::= <ArrayValue> ',' <Value> 
 			   | <Value>
@@ -37,8 +37,8 @@
 					   | t	(horizontal table)
 					   | u<hexdigit><hexdigit><hexdigit><hexdigit>
 					   
-<Number> ::= | <RealNumber><Precision>
-			 | <RealNumber>
+<Number> ::= <RealNumber><Precision>
+		   | <RealNumber>
 					   
 <Precision> ::=  [Ee] [+\-]? <NaturalNumber>
 					   
