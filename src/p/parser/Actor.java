@@ -1,8 +1,8 @@
 package p.parser;
 
-import p.lexer.LexicalToken;
+import p.lexer.Terminal;
 
 public interface Actor {
 
-    public void act(LexicalToken token, CommonBuilder builder);
+    public void act(Terminal token, Builder builder);
 }

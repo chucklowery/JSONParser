@@ -18,7 +18,7 @@ class NumberLexer {
         buffer = new CharBuffer();
     }
 
-    LexicalToken lexNumber(int position, int line) {
+    Terminal lexNumber(int position, int line) {
         buffer.reset();
         Type type;
         State current = State.START;
@@ -39,9 +39,9 @@ class NumberLexer {
             }
             current = nextState;
         }
-        LexicalToken token = new LexicalToken();
+        Terminal token = new Terminal();
         token.line = line;
-        token.type = TokenType.NUMBER;
+        token.type = TerminalType.VALUE_LITERAL;
         token.value = new BigDecimal(buffer.toString());
         token.position = position;
         return token;

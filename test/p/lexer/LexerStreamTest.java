@@ -2,9 +2,7 @@ package p.lexer;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
-import org.hamcrest.core.Is;
 import static org.hamcrest.core.Is.is;
-import org.junit.Assert;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
@@ -15,23 +13,23 @@ public class LexerStreamTest {
         String tokens = "";
 
         LexerStream stream = toLexicalStream(tokens);
-        assertThat(stream.next().getType(), is(TokenType.EOS));
-        assertThat(stream.next().getType(), is(TokenType.EOS));
-        assertThat(stream.next().getType(), is(TokenType.EOS));
+        assertThat(stream.next().getType(), is(TerminalType.EOS));
+        assertThat(stream.next().getType(), is(TerminalType.EOS));
+        assertThat(stream.next().getType(), is(TerminalType.EOS));
     }
 
     @Test
     public void givenEmptStringWithSpaces_expectEOS() {
-        LexicalToken token = toLexicalStream("   ").next();
-        assertThat(token.getType(), is(TokenType.EOS));
-        assertThat(token.position, is(3));
+        Terminal token = toLexicalStream("   ").next();
+        assertThat(token.getType(), is(TerminalType.EOS));
+        assertThat(token.position, is(4));
 
         token = toLexicalStream("\t").next();
-        assertThat(token.getType(), is(TokenType.EOS));
-        assertThat(token.position, is(1));
+        assertThat(token.getType(), is(TerminalType.EOS));
+        assertThat(token.position, is(2));
 
         token = toLexicalStream("\r\r\r\n").next();
-        assertThat(token.getType(), is(TokenType.EOS));
+        assertThat(token.getType(), is(TerminalType.EOS));
         assertThat(token.line, is(4));
     }
 
@@ -40,45 +38,41 @@ public class LexerStreamTest {
         String tokens = "\"abcd\"";
 
         LexerStream stream = toLexicalStream(tokens);
-        LexicalToken token = stream.next();
-
-        assertThat(token.getType(), is(TokenType.STRING));
-        assertThat(token.getValue(), is("abcd"));
+        assertNextTokenValue(stream, TerminalType.STRING_LITERAL, "abcd");
     }
-    
+
     @Test
     public void givenNateralNumberZero_expectNumber() {
         String tokens = "0";
 
         LexerStream stream = toLexicalStream(tokens);
-        LexicalToken token = stream.next();
-
-        assertThat(token.getType(), is(TokenType.NUMBER));
-        assertThat(token.getValue(), is(BigDecimal.ZERO));
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, BigDecimal.ZERO);
     }
-    
+
+    @Test
+    public void givenCommonValueTypes_expectProperValue() {
+        String tokens = "null true false";
+        LexerStream stream = toLexicalStream(tokens);
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, null);
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, Boolean.TRUE);
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, Boolean.FALSE);
+    }
+
     @Test
     public void givenNateralNumber_expectNumber() {
         String tokens = "-123456789";
 
         LexerStream stream = toLexicalStream(tokens);
-        LexicalToken token = stream.next();
-
-        assertThat(token.getType(), is(TokenType.NUMBER));
-        assertThat(token.getValue(), is(new BigDecimal(tokens)));
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, new BigDecimal(tokens));
     }
-    
+
     @Test
     public void givenRealNumber_expectNumber() {
         String tokens = "-123456789.123456789";
 
         LexerStream stream = toLexicalStream(tokens);
-        LexicalToken token = stream.next();
-
-        assertThat(token.getType(), is(TokenType.NUMBER));
-        assertThat(token.getValue(), is(new BigDecimal(tokens)));
+        assertNextTokenValue(stream, TerminalType.VALUE_LITERAL, new BigDecimal(tokens));
     }
-
 
     @Test
     public void givenWordWithEscapedCharacters_expectStringWithValueCharacters() {
@@ -96,25 +90,20 @@ public class LexerStreamTest {
                 + "\"";
 
         LexerStream stream = toLexicalStream(tokens);
-        LexicalToken token = stream.next();
-
-        assertThat(token.getType(), is(TokenType.STRING));
-        assertThat(token.getValue(), is("\"\\/\b\f\n\r\t\uABCD"));
+        assertNextTokenValue(stream, TerminalType.STRING_LITERAL, "\"\\/\b\f\n\r\t\uABCD");
     }
-    
+
     @Test
     public void givenPunctuation_expectPunuationTokens() {
         String source = "{}[]:,";
         LexerStream stream = toLexicalStream(source);
-        
-        assertThat(stream.next().getType(), is(TokenType.OPEN_BRASE));
-        assertThat(stream.next().getType(), is(TokenType.CLOSE_BRASE));
-        assertThat(stream.next().getType(), is(TokenType.OPEN_BRACKET));
-        assertThat(stream.next().getType(), is(TokenType.CLOSE_BRACKET));
-        assertThat(stream.next().getType(), is(TokenType.SEMICOLON));
-        assertThat(stream.next().getType(), is(TokenType.COMMA));
-        
-        
+
+        assertThat(stream.next().getType(), is(TerminalType.OPEN_BRASE));
+        assertThat(stream.next().getType(), is(TerminalType.CLOSE_BRASE));
+        assertThat(stream.next().getType(), is(TerminalType.OPEN_BRACKET));
+        assertThat(stream.next().getType(), is(TerminalType.CLOSE_BRACKET));
+        assertThat(stream.next().getType(), is(TerminalType.SEMICOLON));
+        assertThat(stream.next().getType(), is(TerminalType.COMMA));
     }
 
     private LexerStream toLexicalStream(String tokens) {
@@ -126,4 +115,9 @@ public class LexerStreamTest {
         return new ByteArrayInputStream(stream.getBytes());
     }
 
+    private void assertNextTokenValue(LexerStream stream, TerminalType type, Object value) {
+        Terminal token = stream.next();
+        assertThat(token.getType(), is(type));
+        assertThat(token.getValue(), is(value));
+    }
 }

@@ -1,6 +1,6 @@
 package p.lexer;
 
-public enum TokenType {
+public enum TerminalType {
 
     EOS(null),
     OPEN_BRASE('{'),
@@ -9,19 +9,16 @@ public enum TokenType {
     CLOSE_BRACKET(']'),
     SEMICOLON(':'),
     COMMA(','),
-    NULL(null),
-    TRUE(Boolean.TRUE),
-    FALSE(Boolean.FALSE),
-    STRING(null),
-    NUMBER(null);
+    VALUE_LITERAL(null),
+    STRING_LITERAL(null);
 
     Object cachedValue;
 
-    TokenType(char token) {
+    TerminalType(char token) {
         this(new char[]{token});
     }
 
-    TokenType(Object cachedValue) {
+    TerminalType(Object cachedValue) {
         this.cachedValue = cachedValue;
     }
 

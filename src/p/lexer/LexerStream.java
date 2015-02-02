@@ -14,7 +14,7 @@ public class LexerStream {
     char rawCharacter;
     boolean hasMore = true;
 
-    LexicalToken eos;
+    Terminal eos;
     CharBuffer buffer;
     StringLexer stringLexer;
     NumberLexer numberLexer;
@@ -26,19 +26,14 @@ public class LexerStream {
         numberLexer = new NumberLexer(this.stream);
     }
 
-    public LexicalToken next() {
+    public Terminal next() {
         int raw;
         while (true) {
             raw = read(stream);
             switch (raw) {
                 case -1:
-                    LexicalToken token = new LexicalToken();
-                    token.line = line;
-                    token.position = position;
-
+                    eos = asToken(TerminalType.EOS);
                     hasMore = false;
-                    eos = token;
-                    eos.type = TokenType.EOS;
                     return eos;
                 case ' ':
                 case '\t':
@@ -69,8 +64,8 @@ public class LexerStream {
         }
     }
 
-    private LexicalToken parseToken(int raw) throws CompleteSuprise {
-        LexicalToken token = new LexicalToken();
+    private Terminal parseToken(int raw) throws CompleteSuprise {
+        Terminal token = new Terminal();
         token.line = line;
         token.position = position;
 
@@ -78,25 +73,25 @@ public class LexerStream {
 
         switch (rawCharacter) {
             case '{':
-                return asToken(TokenType.OPEN_BRASE);
+                return asToken(TerminalType.OPEN_BRASE);
             case '}':
-                return asToken(TokenType.CLOSE_BRASE);
+                return asToken(TerminalType.CLOSE_BRASE);
             case '[':
-                return asToken(TokenType.OPEN_BRACKET);
+                return asToken(TerminalType.OPEN_BRACKET);
             case ']':
-                return asToken(TokenType.CLOSE_BRACKET);
+                return asToken(TerminalType.CLOSE_BRACKET);
             case ':':
-                return asToken(TokenType.SEMICOLON);
+                return asToken(TerminalType.SEMICOLON);
             case ',':
-                return asToken(TokenType.COMMA);
+                return asToken(TerminalType.COMMA);
             case '"':
                 return lexStringToken();
             case 'n':
-                return asLiteralToken("null", TokenType.NULL);
+                return asLiteralToken("null", null);
             case 't':
-                return asLiteralToken("true", TokenType.TRUE);
+                return asLiteralToken("true", Boolean.TRUE);
             case 'f':
-                return asLiteralToken("false", TokenType.FALSE);
+                return asLiteralToken("false", Boolean.FALSE);
             case '-':
             case '1':
             case '2':
@@ -115,20 +110,22 @@ public class LexerStream {
         }
     }
 
-    private LexicalToken asLiteralToken(String value, TokenType type) {
-        checkIf(value);
-        return asToken(type, value.length());
+    private Terminal asLiteralToken(String literal, Object value) {
+        checkIf(literal);
+        Terminal asToken = asToken(TerminalType.VALUE_LITERAL, literal.length());
+        asToken.value = value;
+        return asToken;
     }
 
-    private LexicalToken lexStringToken() {
+    private Terminal lexStringToken() {
         char[] chars = stringLexer.lexString(position, line);
-        LexicalToken t = asToken(TokenType.STRING, chars.length);
+        Terminal t = asToken(TerminalType.STRING_LITERAL, chars.length);
         t.value = new String(chars);
         return t;
     }
 
-    private LexicalToken asToken(TokenType type, int length) {
-        LexicalToken token = new LexicalToken();
+    private Terminal asToken(TerminalType type, int length) {
+        Terminal token = new Terminal();
         token.line = line;
         token.position = position + length;
         token.value = null;
@@ -136,11 +133,11 @@ public class LexerStream {
         return token;
     }
 
-    private LexicalToken asToken(TokenType type) {
+    private Terminal asToken(TerminalType type) {
         return asToken(type, 1);
     }
 
-    public void checkIf(String reserved) {
+    private void checkIf(String reserved) {
         for (int i = 1; i < reserved.length(); i++) {
             char letter = readChar(stream);
             if (letter != reserved.charAt(i)) {
@@ -148,7 +145,6 @@ public class LexerStream {
             }
         }
     }
-
 }
 
 class UnexpectedEndOfStream extends IllegalStateException {

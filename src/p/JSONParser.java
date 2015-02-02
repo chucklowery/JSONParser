@@ -2,30 +2,18 @@ package p;
 
 import java.io.InputStream;
 import p.lexer.LexerStream;
-import p.lexer.LexicalToken;
-import p.parser.CommonBuilder;
-import p.parser.Parser;
+import p.parser.DefaultBuilder;
+import p.parser.ParserV2;
 
 public class JSONParser {
 
     public Object parse(InputStream stream) {
         LexerStream lexer = new LexerStream(stream);
-        CommonBuilder builder = new CommonBuilder();
-        Parser parser = new Parser(builder);
+        DefaultBuilder builder = new DefaultBuilder();
+        ParserV2 parser = new ParserV2();
 
-        LexicalToken token;
-        while ((token = lexer.next()) != null) {
-            parser.accept(token);
-        }
+        parser.parse(lexer, builder);
 
-        if (!parser.isFinished()) {
-            throw new UnexpectedEndOfStream();
-        }
-
-        return builder.getProduct();
+        return builder.getStrucuture();
     }
-}
-
-class UnexpectedEndOfStream extends IllegalStateException {
-
 }

@@ -1,6 +1,6 @@
 package p.parser;
 
-import p.lexer.LexicalToken;
+import p.lexer.Terminal;
 
 class Transition {
 
@@ -15,7 +15,7 @@ class Transition {
         this.requiresPush = requiresPush;
     }
 
-    void transition(LexicalToken token, CommonBuilder builder) {
+    void transition(Terminal token, Builder builder) {
         actor.act(token, builder);
     }
 }
