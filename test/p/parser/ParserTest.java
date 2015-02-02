@@ -20,9 +20,9 @@ import p.lexer.LexerStream;
  *
  * @author Chuck Lowery <chuck.lowery @ gopai.com>
  */
-public class ParserV2Test {
+public class ParserTest {
     
-    public ParserV2Test() {
+    public ParserTest() {
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ParserV2Test {
         
         ByteArrayInputStream stream = new ByteArrayInputStream(test.getBytes());
         
-        ParserV2 parserV2 = new ParserV2();
+        Parser parserV2 = new Parser();
         
         PrintBuilder printBuilder = new PrintBuilder();
         
@@ -65,7 +65,7 @@ public class ParserV2Test {
     public void testBuild() {
         ByteArrayInputStream stream = new ByteArrayInputStream("{ \"a\" : 123, \"b\" : 455, \"c\" : [1,2,3, { \"a\" : 1}] }".getBytes());
         
-        ParserV2 parserV2 = new ParserV2();
+        Parser parserV2 = new Parser();
         
         DefaultBuilder builder = new DefaultBuilder();
         

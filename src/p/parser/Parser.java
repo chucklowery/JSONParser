@@ -11,9 +11,9 @@ import p.lexer.LexerStream;
 import p.lexer.Terminal;
 import p.lexer.TerminalType;
 import static p.lexer.TerminalType.*;
-import static p.parser.ParserV2.State.*;
+import static p.parser.Parser.State.*;
 
-public class ParserV2 {
+public class Parser {
 
     private static Transition[][] transitions = new Transition[State.values().length][TerminalType.values().length];
 
@@ -114,7 +114,7 @@ public class ParserV2 {
 
     public static interface Operation {
 
-        public void accept(ParserV2 parser);
+        public void accept(Parser parser);
     }
 
     private void pop() {
