@@ -2,6 +2,7 @@ package p.lexer;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
@@ -106,6 +107,7 @@ public class LexerStreamTest {
         assertThat(stream.next().getType(), is(TerminalType.COMMA));
     }
 
+    
     private LexerStream toLexicalStream(String tokens) {
         LexerStream stream = new LexerStream(toStream(tokens));
         return stream;

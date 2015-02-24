@@ -7,13 +7,23 @@
 package p.parser;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import org.hamcrest.core.Is;
 import static org.hamcrest.core.Is.is;
+import org.junit.Assert;
 import static org.junit.Assert.assertThat;
 import org.junit.Ignore;
 import org.junit.Test;
+import p.JSONPrinter;
 import p.lexer.LexerStream;
 
 /**
@@ -21,63 +31,77 @@ import p.lexer.LexerStream;
  * @author Chuck Lowery <chuck.lowery @ gopai.com>
  */
 public class ParserTest {
-    
+
     public ParserTest() {
     }
 
     @Test
-    public void testPrint() {
-        String test = "{\n" +
-"    \"glossary\": {\n" +
-"        \"title\": \"example glossary\",\n" +
-"		\"GlossDiv\": {\n" +
-"            \"title\": \"S\",\n" +
-"			\"GlossList\": {\n" +
-"                \"GlossEntry\": {\n" +
-"                    \"ID\": \"SGML\",\n" +
-"					\"SortAs\": \"SGML\",\n" +
-"					\"GlossTerm\": \"Standard Generalized Markup Language\",\n" +
-"					\"Acronym\": \"SGML\",\n" +
-"					\"Abbrev\": \"ISO 8879:1986\",\n" +
-"					\"GlossDef\": {\n" +
-"                        \"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\n" +
-"						\"GlossSeeAlso\": [\"GML\", \"XML\"]\n" +
-"                    },\n" +
-"					\"GlossSee\": \"markup\"\n" +
-"                }\n" +
-"            }\n" +
-"        }\n" +
-"    }\n" +
-"}";
+    public void testExample1() throws IOException {
+        InputStream stream = getClass().getResourceAsStream("example1.json");
+        byte[] bytes = readIntoByteArray(stream);
+        ByteArrayInputStream source = new ByteArrayInputStream(bytes);
         
-        ByteArrayInputStream stream = new ByteArrayInputStream(test.getBytes());
         
         Parser parserV2 = new Parser();
-        
-        PrintBuilder printBuilder = new PrintBuilder();
-        
-        parserV2.parse(new LexerStream(stream), printBuilder);
-        
-        System.out.println(printBuilder.toString());
+
+        JSONPrinter printer = new JSONPrinter();
+        DefaultBuilder builder = new DefaultBuilder();
+
+        parserV2.parse(new LexerStream(source), builder);
+        String required = new String(bytes);
+        String result = printer.print(builder.getStrucuture()).toString();
+        assertThat(result, is( required.replace("\r\n", "\n")));
     }
     
     @Test
-    public void testBuild() {
-        ByteArrayInputStream stream = new ByteArrayInputStream("{ \"a\" : 123, \"b\" : 455, \"c\" : [1,2,3, { \"a\" : 1}] }".getBytes());
+    public void testExample2() throws IOException {
+        InputStream stream = getClass().getResourceAsStream("example2.json");
+        byte[] bytes = readIntoByteArray(stream);
+        ByteArrayInputStream source = new ByteArrayInputStream(bytes);
+        
         
         Parser parserV2 = new Parser();
-        
+
+        JSONPrinter printer = new JSONPrinter();
         DefaultBuilder builder = new DefaultBuilder();
-        
+
+        parserV2.parse(new LexerStream(source), builder);
+        String required = new String(bytes);
+        String result = printer.print(builder.getStrucuture()).toString();
+
+        assertThat(result, is( required.replace("\r\n", "\n")));
+    }
+
+    @Test
+    public void testBuild() {
+        ByteArrayInputStream stream = new ByteArrayInputStream("{ \"a\" : 123, \"b\" : 455, \"c\" : [1,2,3, { \"a\" : 1}] }".getBytes());
+
+        Parser parserV2 = new Parser();
+
+        DefaultBuilder builder = new DefaultBuilder();
+
         parserV2.parse(new LexerStream(stream), builder);
-        
+
         Map root = builder.getStrucuture();
         List c = (List) root.get("c");
         assertThat(c.get(0), is(BigDecimal.ONE));
-        Map item3 = (Map)c.get(3);
-        
+        Map item3 = (Map) c.get(3);
+
         assertThat(item3.get("a"), is(BigDecimal.ONE));
     }
+
     
-    
+    public static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int index;
+        while ((index = in.read(buffer)) > 0) {
+            out.write(buffer, 0, index);
+        }
+    }
+
+    public static byte[] readIntoByteArray(InputStream in) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        copy(in, out);
+        return out.toByteArray();
+    }
 }
