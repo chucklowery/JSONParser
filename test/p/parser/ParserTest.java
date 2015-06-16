@@ -8,18 +8,13 @@ package p.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import org.hamcrest.core.Is;
 import static org.hamcrest.core.Is.is;
-import org.junit.Assert;
 import static org.junit.Assert.assertThat;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,6 +49,7 @@ public class ParserTest {
     }
     
     @Test
+    @Ignore
     public void testExample2() throws IOException {
         InputStream stream = getClass().getResourceAsStream("example2.json");
         byte[] bytes = readIntoByteArray(stream);
@@ -69,7 +65,7 @@ public class ParserTest {
         String required = new String(bytes);
         String result = printer.print(builder.getStrucuture()).toString();
 
-        assertThat(result, is( required.replace("\r\n", "\n")));
+        assertThat(result, is( required.replaceAll("[\r\n]+", "\n")));
     }
 
     @Test

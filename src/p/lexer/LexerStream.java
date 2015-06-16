@@ -73,9 +73,9 @@ public class LexerStream {
 
         switch (rawCharacter) {
             case '{':
-                return asToken(TerminalType.OPEN_BRASE);
+                return asToken(TerminalType.OPEN_BRACE);
             case '}':
-                return asToken(TerminalType.CLOSE_BRASE);
+                return asToken(TerminalType.CLOSE_BRACE);
             case '[':
                 return asToken(TerminalType.OPEN_BRACKET);
             case ']':

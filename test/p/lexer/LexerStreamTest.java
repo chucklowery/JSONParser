@@ -99,8 +99,8 @@ public class LexerStreamTest {
         String source = "{}[]:,";
         LexerStream stream = toLexicalStream(source);
 
-        assertThat(stream.next().getType(), is(TerminalType.OPEN_BRASE));
-        assertThat(stream.next().getType(), is(TerminalType.CLOSE_BRASE));
+        assertThat(stream.next().getType(), is(TerminalType.OPEN_BRACE));
+        assertThat(stream.next().getType(), is(TerminalType.CLOSE_BRACE));
         assertThat(stream.next().getType(), is(TerminalType.OPEN_BRACKET));
         assertThat(stream.next().getType(), is(TerminalType.CLOSE_BRACKET));
         assertThat(stream.next().getType(), is(TerminalType.SEMICOLON));

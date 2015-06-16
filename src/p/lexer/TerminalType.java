@@ -3,8 +3,8 @@ package p.lexer;
 public enum TerminalType {
 
     EOS(null),
-    OPEN_BRASE('{'),
-    CLOSE_BRASE('}'),
+    OPEN_BRACE('{'),
+    CLOSE_BRACE('}'),
     OPEN_BRACKET('['),
     CLOSE_BRACKET(']'),
     SEMICOLON(':'),

@@ -14,7 +14,7 @@ public class Parser {
     static {
         inital:
         {
-            tran(INITIAL, OPEN_BRASE, MAP, (p) -> {p.push(State.FINISHED); p.builder.builderMap(); });
+            tran(INITIAL, OPEN_BRACE, MAP, (p) -> {p.push(State.FINISHED); p.builder.builderMap(); });
             tran(INITIAL, OPEN_BRACKET, ARRAY, (p) -> {p.push(State.FINISHED); p.builder.buildArray(); });
         }
         map:
@@ -23,9 +23,9 @@ public class Parser {
             tran(MAP_KEY, SEMICOLON, MAP_ASIGN);
             tran(MAP_ASIGN, STRING_LITERAL, MAP_VALUE, (p) -> {p.builder.buildMapValue(p.terminal.getValue());});
             tran(MAP_ASIGN, VALUE_LITERAL, MAP_VALUE, (p) -> {p.builder.buildMapValue(p.terminal.getValue());});
-            tran(MAP_ASIGN, OPEN_BRASE, MAP, (p) -> {p.push(State.MAP_VALUE);  p.builder.builderMap();});
+            tran(MAP_ASIGN, OPEN_BRACE, MAP, (p) -> {p.push(State.MAP_VALUE);  p.builder.builderMap();});
             tran(MAP_ASIGN, OPEN_BRACKET, ARRAY, (p) -> {p.push(State.MAP_VALUE);  p.builder.buildArray();});
-            tran(MAP_VALUE, CLOSE_BRASE, null, (p) -> {p.pop(); p.builder.finishMap(); });
+            tran(MAP_VALUE, CLOSE_BRACE, null, (p) -> {p.pop(); p.builder.finishMap(); });
             tran(MAP_VALUE, COMMA, MAP);
         }
         array:
@@ -33,7 +33,7 @@ public class Parser {
             tran(ARRAY, STRING_LITERAL, ARRAY_VALUE, (p) -> {p.builder.buildArrayValue(p.terminal.getValue());});
             tran(ARRAY, VALUE_LITERAL, ARRAY_VALUE, (p) -> {p.builder.buildArrayValue(p.terminal.getValue());});
             tran(ARRAY, OPEN_BRACKET, ARRAY, (p) -> {p.push(State.ARRAY_VALUE); p.builder.buildArray();});
-            tran(ARRAY, OPEN_BRASE, MAP, (p) -> {p.push(State.ARRAY_VALUE); p.builder.builderMap();});
+            tran(ARRAY, OPEN_BRACE, MAP, (p) -> {p.push(State.ARRAY_VALUE); p.builder.builderMap();});
             tran(ARRAY_VALUE, COMMA, ARRAY);
             tran(ARRAY_VALUE, CLOSE_BRACKET, null, (p) -> {p.pop(); p.builder.finishArray();} );
         }
