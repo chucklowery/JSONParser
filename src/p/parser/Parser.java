@@ -20,6 +20,7 @@ public class Parser {
         map:
         {
             tran(MAP, STRING_LITERAL, MAP_KEY, (p) -> {p.builder.buildMapKey(p.terminal.getValue().toString());});
+            tran(MAP, CLOSE_BRACE, null, (p) -> {p.pop(); p.builder.finishMap();});
             tran(MAP_KEY, SEMICOLON, MAP_ASIGN);
             tran(MAP_ASIGN, STRING_LITERAL, MAP_VALUE, (p) -> {p.builder.buildMapValue(p.terminal.getValue());});
             tran(MAP_ASIGN, VALUE_LITERAL, MAP_VALUE, (p) -> {p.builder.buildMapValue(p.terminal.getValue());});
@@ -34,14 +35,17 @@ public class Parser {
             tran(ARRAY, VALUE_LITERAL, ARRAY_VALUE, (p) -> {p.builder.buildArrayValue(p.terminal.getValue());});
             tran(ARRAY, OPEN_BRACKET, ARRAY, (p) -> {p.push(State.ARRAY_VALUE); p.builder.buildArray();});
             tran(ARRAY, OPEN_BRACE, MAP, (p) -> {p.push(State.ARRAY_VALUE); p.builder.builderMap();});
+            tran(ARRAY, CLOSE_BRACKET, null, (p) -> {p.pop(); p.builder.finishArray();} );
             tran(ARRAY_VALUE, COMMA, ARRAY);
             tran(ARRAY_VALUE, CLOSE_BRACKET, null, (p) -> {p.pop(); p.builder.finishArray();} );
         }
     }
 
-    private void handleError(Terminal terminal) {
+
+    private void handleError(State state, Terminal terminal) {
         Transition[] trans = transitions[current.ordinal()];
-        String error = "Unexpected token found. Found " + terminal.getValue() + " " + terminal.getType().name() + " expected :";
+        String error = String.format("%s:%s Unexpected token found. During Transition: %s Found %s|%s expected one of:",
+                terminal.getLine(), terminal.getPosition(), state.name(), terminal.getType(), terminal.getValue());
         for (int i = 0; i < trans.length; i++) {
             if (trans[i] != null) {
                 TerminalType type = TerminalType.values()[i];
@@ -75,7 +79,7 @@ public class Parser {
             terminal = stream.next();
             Transition transition = transitions[current.ordinal()][terminal.getType().ordinal()];
             if (transition == null) {
-                handleError(terminal);
+                handleError(current, terminal);
             } else {
                 current = transition.next;
                 if (transition.operation != null) {
