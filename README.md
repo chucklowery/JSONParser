@@ -8,5 +8,6 @@ domain. Instead it allows the end user to make that implementation decision. I.E
 the intermediate structure.   
 
 Reasoning Behind stopping short:
-1.	The rules for the destination domain are often too hard to encode uniformly
-2.	Each destination domain can have different data structure requirements
+
+1. The rules for the destination domain are often too hard to encode uniformly 
+2. Each destination domain can have different data structure requirements
