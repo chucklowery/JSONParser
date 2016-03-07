@@ -17,22 +17,19 @@ class StringLexer {
         this.buffer = new CharBuffer();
     }
 
-    char[] lexString(int position, int line) {
+    char[] lexString(int position, int line, char terminal) {
         this.line = line;
         this.position = position;
         buffer.reset();
 
         while (true) {
             char rawCharacter = readChar(stream);
-            switch (rawCharacter) {
-                case '\\':
-                    rawCharacter = findEscaped(readChar(stream));
-                    buffer.append(rawCharacter);
-                    break;
-                case '"':
-                    return buffer.toArray();
-                default:
-                    buffer.append(rawCharacter);
+            if(rawCharacter == '\\') {
+                buffer.append(findEscaped(readChar(stream)));
+            } else if(rawCharacter == terminal) {
+                return buffer.toArray();
+            } else {
+                buffer.append(rawCharacter);
             }
         }
     }
@@ -41,6 +38,8 @@ class StringLexer {
         switch (c) {
             case '"':
                 return '"';
+            case '\'':
+                return '\'';
             case '\\':
                 return '\\';
             case '/':

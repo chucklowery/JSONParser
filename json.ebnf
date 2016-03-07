@@ -22,9 +22,18 @@
 		  | 'false'
 		  | 'null'
 		  
-<String> ::= '"' <StringValue> '"'
+<String> ::= <DoubleQuotedString>
+           | <SingleQuotedString>
 
-<StringValue> ::= [^"\\]
+
+<DoubleQuotedString> ::= '"' <DoubleQuotedValue> '"'
+
+<DoubleQuotedString> ::= '\'' <SingleQuotedValue> '\''
+
+<DoubleQuotedValue> ::= [^"\\]
+				| \ <StringEscapedValue>
+
+<SingleQuotedValue> ::= [^'\\]
 				| \ <StringEscapedValue>
 				
 <StringEscapedValue> ::= "	(Quotation Mark)

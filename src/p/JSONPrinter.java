@@ -1,9 +1,3 @@
-/*
- * Copyright (C) 2015 Payment Alliance International. All Rights Reserved.
- * 
- * This software is the proprietary information of Payment Alliance International.
- * Use is subject to license terms.
- */
 package p;
 
 import java.util.List;
@@ -12,10 +6,6 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 public class JSONPrinter {
-
-//    public CharSequence print(List<Object> source) {
-//
-//    }
     public CharSequence print(Map<String, Object> source) {
         StringBuilder builder = new StringBuilder();
         Stack<String> tabs = new Stack<>();

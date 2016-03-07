@@ -4,13 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.internal.matchers.IsCollectionContaining.hasItem;
-import static org.junit.internal.matchers.IsCollectionContaining.hasItems;
+
 
 public class JSONParserTest {
 
@@ -62,7 +64,7 @@ public class JSONParserTest {
         Object result = parse("[null]");
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(1));
         assertThat(list, hasItem((String) null));
     }
@@ -88,7 +90,7 @@ public class JSONParserTest {
         Object result = parse("[true]");
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(1));
         assertThat(list, hasItem(Boolean.TRUE));
     }
@@ -98,7 +100,7 @@ public class JSONParserTest {
         Object result = parse("[false]");
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(1));
         assertThat(list, hasItem(Boolean.FALSE));
     }
@@ -108,7 +110,7 @@ public class JSONParserTest {
         Object result = parse("[null, null, true, false]");
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(4));
         assertThat(list, hasItems(null, null, Boolean.TRUE, Boolean.FALSE));
     }
@@ -120,7 +122,7 @@ public class JSONParserTest {
         RESULT_LIST.add(null);
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(3));
         assertThat(list, hasItems(RESULT_LIST, RESULT_LIST, RESULT_LIST));
     }
@@ -134,7 +136,7 @@ public class JSONParserTest {
         RESULT_LIST_1.add(RESULT_LIST);
 
         assertThat(result, instanceOf(List.class));
-        List list = (List) result;
+        List<Object> list = (List) result;
         assertThat(list.size(), is(3));
         assertThat(list, hasItems(RESULT_LIST_1, RESULT_LIST, RESULT_LIST));
     }

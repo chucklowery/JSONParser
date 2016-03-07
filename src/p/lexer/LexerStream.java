@@ -85,7 +85,9 @@ public class LexerStream {
             case ',':
                 return asToken(TerminalType.COMMA);
             case '"':
-                return lexStringToken();
+                return lexStringToken('"');
+            case '\'':
+                return lexStringToken('\'');
             case 'n':
                 return asLiteralToken("null", null);
             case 't':
@@ -117,8 +119,8 @@ public class LexerStream {
         return asToken;
     }
 
-    private Terminal lexStringToken() {
-        char[] chars = stringLexer.lexString(position, line);
+    private Terminal lexStringToken(char terminalToken) {
+        char[] chars = stringLexer.lexString(position, line, terminalToken);
         Terminal t = asToken(TerminalType.STRING_LITERAL, chars.length);
         t.value = new String(chars);
         return t;

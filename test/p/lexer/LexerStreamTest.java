@@ -35,12 +35,29 @@ public class LexerStreamTest {
     }
 
     @Test
-    public void givenWord_expectString() {
+    public void givenWordDoubleQuoted_expectString() {
         String tokens = "\"abcd\"";
 
         LexerStream stream = toLexicalStream(tokens);
         assertNextTokenValue(stream, TerminalType.STRING_LITERAL, "abcd");
     }
+
+    @Test
+    public void givenWordSingleQuoted_expectString() {
+        String tokens = "'abcd'";
+
+        LexerStream stream = toLexicalStream(tokens);
+        assertNextTokenValue(stream, TerminalType.STRING_LITERAL, "abcd");
+    }
+
+    @Test(expected = UnexpectedEndOfStream.class)
+    public void givenWordWithInvalid_terminal_seperators_expectString() {
+        String tokens = "'abcd\"";
+
+        LexerStream stream = toLexicalStream(tokens);
+        assertNextTokenValue(stream, TerminalType.STRING_LITERAL, "abcd");
+    }
+
 
     @Test
     public void givenNateralNumberZero_expectNumber() {
