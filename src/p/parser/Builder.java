@@ -1,24 +1,18 @@
-/*
- * Copyright (C) 2015 Payment Alliance International. All Rights Reserved.
- * 
- * This software is the proprietary information of Payment Alliance International.
- * Use is subject to license terms.
- */
 package p.parser;
 
 public interface Builder {
 
-    public void builderMap();
+    void builderMap();
 
-    public void buildMapKey(String key);
+    void buildMapKey(String key);
 
-    public void buildMapValue(Object value);
+    void buildMapValue(Object value);
 
-    public void finishMap();
+    void finishMap();
 
-    public void buildArray();
+    void buildArray();
 
-    public void buildArrayValue(Object value);
+    void buildArrayValue(Object value);
 
-    public void finishArray();
+    void finishArray();
 }
